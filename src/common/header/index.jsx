@@ -24,25 +24,26 @@ class Header extends Component {
 		super(props)
 		console.log(this.props)
 	}
-	getListArea(show){
-		if (show) {
+	getListArea(focus,mouse){
+		const {list,page,totalPage,size,handleMouseEnter,handleMouseLeave,handlePageChange} = this.props
+		let searchItem = [];
+		if(list.length){
+			for(let i = (page-1)*size;i < page*size;i++){
+				searchItem.push(<SearchInfoItem key={list[i]}>{list[i]}</SearchInfoItem>)
+			}
+		}
+		if (focus||mouse) {
 			return (
-				<SearchInfo>
+				<SearchInfo onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
 					<SearchInfoTitle>
 						热门搜索
-						<SearchInfoSwitch>
+						<SearchInfoSwitch onClick={()=>handlePageChange(page,totalPage)}>
 							<i className="iconfont spin">&#xe851;</i>
 							换一批
 						</SearchInfoSwitch>
 					</SearchInfoTitle>
 					<SearchInfoList>
-						{
-							this.props.list.map((item)=>{
-								return (
-									<SearchInfoItem key={item}>{item}</SearchInfoItem>
-								)
-							})
-						}
+						{searchItem}
 					</SearchInfoList>
 				</SearchInfo>
 			)
@@ -52,6 +53,7 @@ class Header extends Component {
 	}
 
 	render(){
+		const {focused,mouseIn,handleInputFocus,handleInputBlur} = this.props
 		return (
 			<HeaderWrapper>
 				<Logo />
@@ -62,19 +64,19 @@ class Header extends Component {
 					<NavItem className='right'><i className="iconfont">&#xe636;</i></NavItem>
 					<SearchWrapper>
 						<CSSTransition
-							in={this.props.focused}
+							in={focused||mouseIn}
 							timeout={200}
 							classNames="slide"
 						>
 							<NavSearch
-								className={this.props.focused ? 'focused' : ''}
-								onFocus={this.props.handleInputFocus}
-								onBlur={this.props.handleInputBlur}
+								className={focused||mouseIn ? 'focused' : ''}
+								onFocus={handleInputFocus}
+								onBlur={()=>handleInputBlur(mouseIn)}
 							>
 							</NavSearch>
 						</CSSTransition>
-						<i className={this.props.focused ? 'focused zoom' : 'zoom'}>&#xe614;</i>
-						{this.getListArea(this.props.focused)}
+						<i className={focused||mouseIn ? 'focused zoom' : 'zoom'}>&#xe614;</i>
+						{this.getListArea(focused,mouseIn)}
 					</SearchWrapper>
 				</Nav>
 				<Addition>
@@ -89,6 +91,10 @@ class Header extends Component {
 const mapStateToProps = (state) => {
 	return {
 		focused: state.header.focused,
+		mouseIn:state.header.mouseIn,
+		page:state.header.page,
+		totalPage:state.header.totalPage,
+		size:state.header.size,
 		list:state.header.list
 	}
 }
@@ -98,9 +104,19 @@ const mapDispathToProps = (dispath) => {
 			dispath(actionCreators.getList())
 			dispath(actionCreators.searchFocus())
 		},
-		handleInputBlur() {
+		handleInputBlur(mouseIn) {
+			
 			dispath(actionCreators.searchBlur())
-		}
+		},
+		handleMouseEnter(){
+			dispath(actionCreators.mouseEnter())
+		},
+		handleMouseLeave(){
+			dispath(actionCreators.mouseLeave())
+		},
+		handlePageChange(page,totalPage){
+			page<totalPage?dispath(actionCreators.pageChange(++page)):dispath(actionCreators.pageChange(1))
+		},
 	}
 }
 export default connect(mapStateToProps, mapDispathToProps)(Header)
