@@ -40,7 +40,6 @@ export default (state = defaultState, action) => {
         list: action.data
       }
     case actionType.PAGE_CHANGE:
-      console.log(action)
       return {
         ...state,
         page: action.data

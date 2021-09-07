@@ -37,8 +37,8 @@ class Header extends Component {
 				<SearchInfo onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
 					<SearchInfoTitle>
 						热门搜索
-						<SearchInfoSwitch onClick={()=>handlePageChange(page,totalPage)}>
-							<i className="iconfont spin">&#xe851;</i>
+						<SearchInfoSwitch onClick={()=>handlePageChange(page,totalPage,this.spinRef)}>
+							<i ref={(node) => {this.spinRef = node}} className="iconfont spin">&#xe851;</i>
 							换一批
 						</SearchInfoSwitch>
 					</SearchInfoTitle>
@@ -53,7 +53,7 @@ class Header extends Component {
 	}
 
 	render(){
-		const {focused,mouseIn,handleInputFocus,handleInputBlur} = this.props
+		const {focused,mouseIn,handleInputFocus,handleInputBlur,list} = this.props
 		return (
 			<HeaderWrapper>
 				<Logo />
@@ -70,12 +70,12 @@ class Header extends Component {
 						>
 							<NavSearch
 								className={focused||mouseIn ? 'focused' : ''}
-								onFocus={handleInputFocus}
-								onBlur={()=>handleInputBlur(mouseIn)}
+								onFocus={()=>handleInputFocus(list)}
+								onBlur={handleInputBlur}
 							>
 							</NavSearch>
 						</CSSTransition>
-						<i className={focused||mouseIn ? 'focused zoom' : 'zoom'}>&#xe614;</i>
+						<i className={focused||mouseIn ? 'focused zoom iconfont' : 'zoom iconfont'}>&#xe614;</i>
 						{this.getListArea(focused,mouseIn)}
 					</SearchWrapper>
 				</Nav>
@@ -100,12 +100,14 @@ const mapStateToProps = (state) => {
 }
 const mapDispathToProps = (dispath) => {
 	return {
-		handleInputFocus() {
-			dispath(actionCreators.getList())
+		handleInputFocus(list) {
 			dispath(actionCreators.searchFocus())
-		},
-		handleInputBlur(mouseIn) {
+			// 如果已经有数据了就不再发送请求
+			if(list&&list.length !== 0) return
+			dispath(actionCreators.getList())
 			
+		},
+		handleInputBlur() {
 			dispath(actionCreators.searchBlur())
 		},
 		handleMouseEnter(){
@@ -114,7 +116,14 @@ const mapDispathToProps = (dispath) => {
 		handleMouseLeave(){
 			dispath(actionCreators.mouseLeave())
 		},
-		handlePageChange(page,totalPage){
+		handlePageChange(page,totalPage,node){
+			// 点一次就让小圈+360deg
+			if(node.style.transform){
+				let originAngle = node.style.transform.split('(')[1].split('d')[0]
+				node.style.transform = `rotate(${originAngle*1+360}deg)`
+			}else {
+				node.style.transform = 'rotate(360deg)'
+			}
 			page<totalPage?dispath(actionCreators.pageChange(++page)):dispath(actionCreators.pageChange(1))
 		},
 	}
