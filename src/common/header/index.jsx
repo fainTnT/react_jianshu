@@ -98,23 +98,23 @@ const mapStateToProps = (state) => {
 		list:state.header.list
 	}
 }
-const mapDispathToProps = (dispath) => {
+const mapDispatchToProps = (dispatch) => {
 	return {
 		handleInputFocus(list) {
-			dispath(actionCreators.searchFocus())
+			dispatch(actionCreators.searchFocus())
 			// 如果已经有数据了就不再发送请求
 			if(list&&list.length !== 0) return
-			dispath(actionCreators.getList())
+			dispatch(actionCreators.getList())
 			
 		},
 		handleInputBlur() {
-			dispath(actionCreators.searchBlur())
+			dispatch(actionCreators.searchBlur())
 		},
 		handleMouseEnter(){
-			dispath(actionCreators.mouseEnter())
+			dispatch(actionCreators.mouseEnter())
 		},
 		handleMouseLeave(){
-			dispath(actionCreators.mouseLeave())
+			dispatch(actionCreators.mouseLeave())
 		},
 		handlePageChange(page,totalPage,node){
 			// 点一次就让小圈+360deg
@@ -124,8 +124,8 @@ const mapDispathToProps = (dispath) => {
 			}else {
 				node.style.transform = 'rotate(360deg)'
 			}
-			page<totalPage?dispath(actionCreators.pageChange(++page)):dispath(actionCreators.pageChange(1))
+			page<totalPage?dispatch(actionCreators.pageChange(++page)):dispatch(actionCreators.pageChange(1))
 		},
 	}
 }
-export default connect(mapStateToProps, mapDispathToProps)(Header)
+export default connect(mapStateToProps, mapDispatchToProps)(Header)
